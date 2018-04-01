@@ -1,41 +1,58 @@
 import matplotlib
 import copy
 import math
+import networkx as nx
+import pylab
+from matplotlib.pyplot import pause
 
-class Graph :
-    def __init__(self, listStr, listGrph):
-        self.connections = []
-        if(listStr == []):
-            self = None
-        elif (listStr[0] == []):
-            listStr.pop(0)
-            self = Graph(listStr, listGrph)
-        elif (listStr[0][0] == []) :
-            listStr[0].pop(0)
-            self = Graph(listStr,listGrph)
-        else:
-            self.value = listStr[0][0]
-            self.coordinate = (listStr[0][1], listStr[0][2])
-            listGrph.append(self)
-            for i in range(3,len(listStr[0])):
-                xs = next((x for x in listGrph if x.value == listStr[0][i]), None)
-                if(xs != None):
-                    self.connections.append(xs)
-                else:
-                    listStr2 = copy.deepcopy(listStr)
-                    listStr2.pop(0)
-                    a  = [x[0] for x in listStr2].index(listStr[0][i])
-                    listStr2[a], listStr2[0] = listStr2[0], listStr2[a]
-                    self.connections.append(Graph(listStr2,listGrph))
-    def getConnections(self):
-        return self.connections
-    def getDistance(self, G):
-        sx, sy = self.coordinate
-        gx, gy = G.coordinate
-        x = (sx - gx)**2
-        y = (sy - gy)**2
-        return(math.sqrt(x + y))
-    def __repr__(self):
-        return(self.value)
-    def __str__(self):
-        return self.value
+pylab.ion()
+
+class Graph(nx.Graph) :
+    def __init__(self, lStr, mtrx):
+        listStr = copy.deepcopy(lStr)
+        self.listDistance = {}
+        for s in lStr :
+            self.listDistance[s[0]] = {}
+        i = 0 
+        for lM in mtrx :
+            j = 0
+            for mx in lM :
+                self.listDistance[lStr[i][0]][lStr[j][0]] = mx
+                j+= 1
+            i+= 1
+        i = 0
+        self.listValue = []
+        self.node_number = 0
+        super(Graph,self).__init__()
+        while(listStr != []):
+            if (listStr[0] == []):
+                listStr.pop(0)
+            elif (listStr[0][0] == []) :
+                listStr[0].pop(0)
+            else:
+                self.node_number += 1
+                k = listStr[0][0]
+                self.add_node(k, Position=(listStr[0][1], listStr[0][2]))
+                self.listValue.append(listStr[0][0])
+                listStr.pop(0)
+                for s1 in lStr :
+                    for s2 in lStr :
+                        if (self.listDistance[s1[0]][s2[0]] != 0) :
+                             self.add_edge(s1[0],s2[0])
+    def getDistance(self, e1, e2) :
+        return(self.listDistance[e1][e2])
+    def getDistancePos(self, e1,e2) :
+        lpos = nx.get_node_attributes(self,'Position')
+        pos1 = lpos[e1]
+        pos2 = lpos[e2]
+        a = (pos1[0] - pos2[0]) * (pos1[0] - pos2[0])
+        b = (pos1[1] - pos2[1]) * (pos1[1] - pos2[1])
+        return math.sqrt(a + b)
+    def getConnections(self,e1) :
+        l = []
+        for s in self.listValue :
+            if self.listDistance[e1][s] != 0 :
+                l.append(s)
+        return(l)
+    
+        

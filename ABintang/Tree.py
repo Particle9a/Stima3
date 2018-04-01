@@ -24,7 +24,7 @@ class Tree :
         else :
             G = listP.pop(0)
             for child in self.children :
-                if child.value[0].value == G[0].value :
+                if child.value[0] == G[0] :
                     child.addChildPath(X,listP)
                     break
 
@@ -37,7 +37,7 @@ class Tree :
         else :
             G = listP.pop(0)
             for child in self.children :
-                if child.value[0].value == G[0].value :
+                if child.value[0] == G[0] :
                     child.addPath(X,listP)
                     break
 
